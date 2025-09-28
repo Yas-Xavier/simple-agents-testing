@@ -8,9 +8,16 @@ pipeline {
     }
     
     stages {
-        stage('Build Website') {
+        stage('Checkout Code') {
             steps {
-                echo 'Building and Deploying Website...'
+                echo 'Checking out code from GitHub...'
+                git branch: 'main', url: "${REPO_URL}"
+            }
+        }
+
+        stage('Deploy Website') {
+            steps {
+                echo 'Deploying code to web server...'
                 script {
                     withCredentials([sshUserPrivateKey(credentialsId: env.SSH_CREDENTIAL_ID, keyFileVariable: 'SSH_KEY')]) {
                         sh """
@@ -28,13 +35,13 @@ pipeline {
             }
         }
     }
-    
+
     post {
         success {
-            echo '🎉 Website deployed successfully!'
+            echo '✅ Deployment completed successfully on dynamic agent.'
         }
         failure {
-            echo '🚨 Deployment failed. Check the logs.'
+            echo '❌ Deployment failed. Please check logs.'
         }
     }
 }
