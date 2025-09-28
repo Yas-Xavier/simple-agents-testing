@@ -1,12 +1,12 @@
 pipeline {
     agent any
-    
+
     environment {
         REPO_URL = 'https://github.com/Yas-Xavier/simple-agents-testing.git'
-        WEB_SERVER = '54.234.50.56'
-        SSH_CREDENTIAL_ID = 'ssh-credentials'
+        WEB_SERVER = '54.234.50.56'  // your EC2 public IP
+        SSH_CREDENTIAL_ID = 'ssh-credentials'  // Jenkins credential ID (SSH private key)
     }
-    
+
     stages {
         stage('Checkout Code') {
             steps {
@@ -19,9 +19,10 @@ pipeline {
             steps {
                 echo 'Deploying code to web server...'
                 script {
-                    withCredentials([sshUserPrivateKey(credentialsId: env.SSH_CREDENTIAL_ID, keyFileVariable: 'SSH_KEY')]) {
+                    withCredentials([sshUserPrivateKey(credentialsId: env.SSH_CREDENTIAL_ID,
+                                                      keyFileVariable: 'SSH_KEYFILE')]) {
                         sh """
-                            ssh -i \$SSH_KEY -o StrictHostKeyChecking=no ec2-user@${WEB_SERVER} '
+                            ssh -i $SSH_KEYFILE -o StrictHostKeyChecking=no ec2-user@${WEB_SERVER} '
                                 sudo rm -rf /var/www/html/*
                                 sudo git clone ${REPO_URL} /tmp/repo-temp
                                 sudo cp -r /tmp/repo-temp/* /var/www/html/
